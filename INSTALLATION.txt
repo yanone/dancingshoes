@@ -1,0 +1,26 @@
+Dancing Shoes
+Installation Instructions
+
+
+Main Library:
+
+Dancing Shoes is a python library, that needs to be accessible
+from your python scripts.
+
+If you want to use it only from within FontLab Studio, you can copy
+the folder "dancingshoes" to your FontLab's modules folder at
+[...]/FontLab/Studio 5/Macros/System/Modules/
+
+Alternatively, you can copy it to your Python's site-packages folder,
+to make it accesible system-wide.
+On the Mac, this is usually located at /Library/Python/2.3/site-packages/
+(change the 2.3 to your preferred version of Python that you're using).
+On Windows, this folder could be located at c:\Python24\site-packages,
+but you probably know where to find it.
+
+
+FontLab Sample Script:
+
+The sample script DancingShoesInFontLab.py from the "Sample Files" folder
+belongs in your FontLabs Macro folder at [...]/FontLab/Studio 5/Macros/
+to make it accessible in FontLab's Macro toolbar.
