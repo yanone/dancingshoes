@@ -203,6 +203,13 @@ class DancingShoes:
 			return False
 
 
+	def SortGSUBLookups(self, feature, reverse = False):
+		'''
+		Sort lookups of type 'feature' by number of source glyphs.
+		This is to make sure that 'sub f f i' comes before 'sub f i'. In that case, reverse must be set to True.
+		Example: shoes.SortGSUBLookups('liga', reverse=True)
+		'''
+		self.adjustments = sorted(self.adjustments, reverse=reverse, key=lambda v: len(v.source.split(' ')) if (v.feature == feature and v.type == 'GSUBLookup') else None)
 
 
 	def SourceGlyphFromTarget(self, target):
