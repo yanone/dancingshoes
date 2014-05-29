@@ -673,7 +673,7 @@ class DancingShoes:
 
 
 
-	def GetFDKClassesCode(self, codeversion = None):
+	def GetFDKClassesCode(self, codeversion = None, break_after_glyphnames = 5):
 		'''
 		Return classes code all in one string.
 		'''
@@ -697,8 +697,15 @@ class DancingShoes:
 			if not classname.startswith('@'):
 				classname = '@' + classname
 			featurecode.append('%s = [' % (classname))
-			featurecode.append('# ' + str(len(self.classes[classname])) + ' glyph(s)')
-			featurecode.append(' '.join(self.classes[classname]))
+			current_class = self.classes[classname]
+			num_glyphs = len(current_class)
+			num_lines = num_glyphs // break_after_glyphnames
+			featurecode.append('# %i glyph(s)' % num_glyphs)
+			for i in range(num_lines):
+				featurecode.append(' '.join(current_class[:break_after_glyphnames]))
+				current_class = current_class[break_after_glyphnames:]
+			if len(current_class) > 0:
+				featurecode.append(' '.join(current_class))
 			featurecode.append('];')
 			featurecode.append('')
 
