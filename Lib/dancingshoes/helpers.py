@@ -33,6 +33,8 @@ def GlyphNamesFromGlyphsFont(f):
 	return list
 
 def GlyphNamesFromRoboFabFont(f):
+	if hasattr(f, "glyphOrder"):
+		return f.glyphOrder
 	list = []
 	for g in f:
 		list.append(g.name)
