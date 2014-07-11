@@ -28,7 +28,7 @@ def GlyphNamesFromGlyphsFont(f):
 def GlyphNamesFromRoboFabFont(f):
 	if hasattr(f, "glyphOrder"):
 		return f.glyphOrder
-	return [g.name for g in f.glyphs]
+	return f.keys()
 
 
 def AssignFeatureCodeToFontLabFont(f, shoes):
