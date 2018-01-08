@@ -20,25 +20,15 @@ def SubstitutionsFromCSV(path):
 
 
 def GlyphNamesFromFontLabFont(f):
-	list = []
-	for g in f.glyphs:
-		list.append(g.name)
-	return list
+	return [g.name for g in f.glyphs]
 
 def GlyphNamesFromGlyphsFont(f):
-	list = []
-	for g in f.glyphs:
-		if g.export:
-			list.append(g.name)
-	return list
+	return [g.name for g in f.glyphs if g.export]
 
 def GlyphNamesFromRoboFabFont(f):
 	if hasattr(f, "glyphOrder"):
 		return f.glyphOrder
-	list = []
-	for g in f:
-		list.append(g.name)
-	return list
+	return f.keys()
 
 
 def AssignFeatureCodeToFontLabFont(f, shoes):
