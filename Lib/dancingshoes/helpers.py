@@ -2,19 +2,18 @@
 
 import re, os
 # input files
+import csv
 
 # read simple substitutions from a comma-delimited, quote-embraced CSV file
 def SubstitutionsFromCSV(path):
-	list = []
-	csv = open(path, 'r')
-	for line in csv:
-		lineparts = re.findall('(".+?")?,?', line)
-		lineparts = map(unquote, lineparts)
-		lineparts = lineparts[0:8]
-		if lineparts[0] and lineparts[1] and lineparts[2]: # first three fields (feature, source and target) are required
-			list.append(lineparts)
-	csv.close()
 
+	list = []
+	with open(path, 'r') as csvfile:
+		csvreader = csv.reader(csvfile)
+		for row in csvreader:
+			print row
+			if row[0] and row[1] and row[2]: # first three fields (feature, source and target) are required
+				list.append(row)
 	return list
 
 
