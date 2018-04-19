@@ -634,17 +634,21 @@ class DancingShoes:
 
 
 			# Lookups
-			for lookup in usedlookups:
-		
-				if lookup == '__DEFAULT__':
-					lookupname = "%s_%s" % (feature, self.RunningNumber())
-				else:
-					lookupname = "%s_%s_%s" % (feature, lookup, self.RunningNumber())
+			for lookupKey in usedlookups:
 
-				featurecode.append('%slookup %s {' % (self.indent * indentlevel, lookupname))
-				featurecode.extend(self.GetFDKLookups(feature, script, language, lookup, indentlevel + 1, codeversion))
-				featurecode.append('%s} %s;' % (self.indent * indentlevel, lookupname))
-				featurecode.append('')
+				for lookupCode in self.GetFDKLookups(feature, script, language, lookupKey, indentlevel + 1, codeversion):
+
+#					print lookupKey, lookupCode[:100]
+		
+					if lookupKey == '__DEFAULT__':
+						lookupname = "%s_%s" % (feature, self.RunningNumber())
+					else:
+						lookupname = "%s_%s_%s" % (feature, lookupKey, self.RunningNumber())
+
+					featurecode.append('%slookup %s {' % (self.indent * indentlevel, lookupname))
+					featurecode.append(lookupCode)
+					featurecode.append('%s} %s;' % (self.indent * indentlevel, lookupname))
+					featurecode.append('')
 
 		return featurecode
 
@@ -659,15 +663,17 @@ class DancingShoes:
 			lookupflagjoiner = ' '
 
 		lookupflags = self.UsedLookupFlags(feature, script, language, lookup)
-#		print 'lookupflags', lookupflags
 
 		for lookupflag in lookupflags:
+			lookupcode = []
 
 			if lookupflag == '__DEFAULT__':
-				featurecode.extend(FDKadjustmentcode(self.UsedAdjustments(feature, script, language, lookup, '__DEFAULT__'), indentlevel + 1))
+				lookupcode.extend(FDKadjustmentcode(self.UsedAdjustments(feature, script, language, lookup, '__DEFAULT__'), indentlevel + 1))
 			else:
-				featurecode.append('%slookupflag %s;' % (self.indent * indentlevel, lookupflagjoiner.join(lookupflag.split(','))))
-				featurecode.extend(FDKadjustmentcode(self.UsedAdjustments(feature, script, language, lookup, lookupflag), indentlevel + 1))
+				lookupcode.append('%slookupflag %s;' % (self.indent * indentlevel, lookupflagjoiner.join(lookupflag.split(','))))
+				lookupcode.extend(FDKadjustmentcode(self.UsedAdjustments(feature, script, language, lookup, lookupflag), indentlevel + 1))
+			featurecode.append('\n'.join(lookupcode))
+
 
 		return featurecode
 
