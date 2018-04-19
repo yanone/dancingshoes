@@ -11,7 +11,7 @@ def SubstitutionsFromCSV(path):
 	with open(path, 'r') as csvfile:
 		csvreader = csv.reader(csvfile)
 		for row in csvreader:
-			print row
+#			print row
 			if row[0] and row[1] and row[2]: # first three fields (feature, source and target) are required
 				list.append(row)
 	return list

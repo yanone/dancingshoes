@@ -659,6 +659,7 @@ class DancingShoes:
 			lookupflagjoiner = ' '
 
 		lookupflags = self.UsedLookupFlags(feature, script, language, lookup)
+#		print 'lookupflags', lookupflags
 
 		for lookupflag in lookupflags:
 
