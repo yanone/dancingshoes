@@ -304,15 +304,22 @@ class DancingShoes:
 		Returns list of tuples of all script/language combinations that have been registered.
 		'''
 		list = []
+
+		_scripts = []
+
 		for adjustment in self.adjustments:
 			if not (adjustment.script, adjustment.language) in list:
 				list.append((adjustment.script, adjustment.language))
+			if not adjustment.script in _scripts:
+				_scripts.append(adjustment.script)
 
 		# Add dflt/dflt and ltn/dflt
 		if not ('__DEFAULT__', '__DEFAULT__') in list:
 			list.append(('__DEFAULT__', '__DEFAULT__'))
-		if not ('latn', '__DEFAULT__') in list:
-			list.append(('latn', '__DEFAULT__'))
+		for script in _scripts:
+			if not (script, '__DEFAULT__') in list:
+				list.append((script, '__DEFAULT__'))
+
 
 		return list
 
