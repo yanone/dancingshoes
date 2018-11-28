@@ -457,7 +457,7 @@ class DancingShoes:
 		if self.classes.has_key(classname):
 			return self.classes[classname]
 		else:
-			return None
+			return []
 
 
 	# NEW in 1.0.3, not yet documented
