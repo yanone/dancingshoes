@@ -68,7 +68,7 @@ def AssignFeatureCodeToGlyphsFont(f, shoes):
 	for otclass in usedclasses:
 		newClass = GSClass()
 		newClass.name = otclass.replace('@', '')
-		newClass.code = ' '.join(shoes.GlyphsInClass(otclass))
+		newClass.code = '\n'.join(shoes.GlyphsInClass(otclass))
 		newClass.automatic = False # The Class will not be removed on the next autogenerate run.
 		f.classes.append(newClass)
 		
