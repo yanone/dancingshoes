@@ -125,7 +125,7 @@ class DancingShoes:
 		'''
 		Returns self.glyphgroups.keys()
 		'''
-		return self.glyphgroups.keys()
+		return list(self.glyphgroups.keys())
 
 
 	def HasGroups(self, groupslist):
@@ -151,20 +151,20 @@ class DancingShoes:
 
 
 	def HasClasses(self, classnames):
-		u"""\
+		"""\
 		Return all classes from given list that are currently registered.
 		"""
 
 		classespresent = []
 		
 		if isinstance(classnames, str):
-			if self.classes.has_key(classnames):
+			if classnames in self.classes:
 				classespresent.append(classnames)
 
 		elif isinstance(classnames, list) or isinstance(classnames, tuple):
 
 			for classname in classnames:
-				if self.classes.has_key(classname):
+				if classname in self.classes:
 					classespresent.append(classname)
 			
 		return classespresent
@@ -232,7 +232,7 @@ class DancingShoes:
 		'''
 		Returns list of all classes that have been successfully registered so far.
 		'''
-		return self.classes.keys()
+		return list(self.classes.keys())
 
 
 	def UsedScripts(self, feature, includedefault = True, includeforeign = True):
@@ -285,7 +285,7 @@ class DancingShoes:
 		for adjustment in self.adjustments:
 			if feature == adjustment.feature and script == adjustment.script and language == adjustment.language and lookup == adjustment.lookup:
 				list[adjustment.lookupflag] = 'used'
-		return list.keys()
+		return list(list.keys())
 
 
 	def UsedAdjustments(self, feature, script, language, lookup, lookupflag):
@@ -413,10 +413,10 @@ class DancingShoes:
 	def AddGlyphsToClass(self, classname, glyphnames):
 		if not classname.startswith('@'):
 			classname = '@' + classname
-		if not self.classes.has_key(classname):
+		if classname not in self.classes:
 			self.classes[classname] = []
 			
-		if isinstance(glyphnames, str) or isinstance(glyphnames, int) or isinstance(glyphnames, unicode):
+		if isinstance(glyphnames, str) or isinstance(glyphnames, int) or isinstance(glyphnames, str):
 			if self.HasGlyphs([glyphnames]):
 				self.classes[classname].append(glyphnames)
 		elif isinstance(glyphnames, tuple) or isinstance(glyphnames, list):
@@ -454,7 +454,7 @@ class DancingShoes:
 
 	# NEW in 1.0.3, not yet documented
 	def GlyphsInClass(self, classname):
-		if self.classes.has_key(classname):
+		if classname in self.classes:
 			return self.classes[classname]
 		else:
 			return []
@@ -462,7 +462,7 @@ class DancingShoes:
 
 	# NEW in 1.0.3, not yet documented
 	def ClassHasGlyphs(self, classname, glyphnames):
-		if self.classes.has_key(classname):
+		if classname in self.classes:
 			if isinstance(glyphnames, str):
 				if glyphnames in self.GlyphsInClass(classname):
 					return True
@@ -494,7 +494,7 @@ class DancingShoes:
 		for token in tokens:
 			if token.startswith('@'): # is class, add members of class
 				classname = token[1:]
-				if self.classes.has_key(classname):
+				if classname in self.classes:
 					list.extend(self.classes[classname])
 			else:
 				list.append(token)
@@ -705,7 +705,7 @@ class DancingShoes:
 
 		# Classes
 
-		classes = self.classes.keys()
+		classes = list(self.classes.keys())
 		classes.sort()
 		for classname in classes:
 			if not classname.startswith('@'):
@@ -865,7 +865,7 @@ def CollectGlyphGroups(glyphnames):
 	for glyphname in glyphnames:
 		if '.' in glyphname: # has ending, but is no ligature
 			ending = os.path.splitext(glyphname)[1]
-			if not list.has_key(ending):
+			if ending not in list:
 				list[ending] = []
 			list[ending].append(glyphname)
 	
@@ -923,7 +923,7 @@ class Ddict(dict):
         self.default = default
        
     def __getitem__(self, key):
-        if not self.has_key(key):
+        if key not in self:
             self[key] = self.default()
         return dict.__getitem__(self, key)
 
