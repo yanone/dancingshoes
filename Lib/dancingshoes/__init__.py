@@ -36,7 +36,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 import string, os, re, copy
-import dancingshoes.opentypenames
+from dancingshoes import opentypenames
+import functools
 
 __all__ = ['opentypenames', 'helpers']
 __version__ = '0.1.4'
@@ -281,47 +282,49 @@ class DancingShoes:
 	def UsedLookupFlags(self, feature, script, language, lookup):
 		'''	Returns list of all lookupflags that have been registered for given feature and script and language.
 		'''
-		list = {}
+		lookupflagslist = {}
 		for adjustment in self.adjustments:
 			if feature == adjustment.feature and script == adjustment.script and language == adjustment.language and lookup == adjustment.lookup:
-				list[adjustment.lookupflag] = 'used'
-		return list(list.keys())
+				lookupflagslist[adjustment.lookupflag] = 'used'
+		return list(lookupflagslist.keys())
 
 
 	def UsedAdjustments(self, feature, script, language, lookup, lookupflag):
 		'''
 		Returns list of all adjustments that have been registered for given feature and script and language.
 		'''
-		list = []
+		adjustments = []
 		for adjustment in self.adjustments:
 			if language == adjustment.language and feature == adjustment.feature and script == adjustment.script and lookup == adjustment.lookup and lookupflag == adjustment.lookupflag:
-				list.append(adjustment)
-		return list
+				adjustments.append(adjustment)
+		return adjustments
 
 
 	def UsedScriptsAndLanguages(self):
 		'''
 		Returns list of tuples of all script/language combinations that have been registered.
 		'''
-		list = []
+		languagesystems = []
 
 		_scripts = []
 
 		for adjustment in self.adjustments:
-			if not (adjustment.script, adjustment.language) in list:
-				list.append((adjustment.script, adjustment.language))
+			if not (adjustment.script, adjustment.language) in languagesystems:
+				language = adjustment.language
+				language = language.replace("dflt", '__DEFAULT__')
+				languagesystems.append((adjustment.script, language))
 			if not adjustment.script in _scripts:
 				_scripts.append(adjustment.script)
 
 		# Add dflt/dflt and ltn/dflt
-		if not ('__DEFAULT__', '__DEFAULT__') in list:
-			list.append(('__DEFAULT__', '__DEFAULT__'))
+		if not ('__DEFAULT__', '__DEFAULT__') in languagesystems:
+			languagesystems.append(('__DEFAULT__', '__DEFAULT__'))
 		for script in _scripts:
-			if not (script, '__DEFAULT__') in list:
-				list.append((script, '__DEFAULT__'))
+			if not (script, '__DEFAULT__') in languagesystems:
+				languagesystems.append((script, '__DEFAULT__'))
 
-
-		return list
+		languagesystems.sort(key=functools.cmp_to_key(LanguageSystemSort))
+		return languagesystems
 
 
 	## Add adjustments
@@ -605,10 +608,10 @@ class DancingShoes:
 		# Script
 		if codeversion == "2.3":
 			usedscripts = self.UsedScripts(feature)
-			usedscripts.sort(ScriptSort)
+			usedscripts.sort(key=functools.cmp_to_key(ScriptSort))
 		else:
 			usedscripts = self.UsedScripts(feature, False, True)
-			usedscripts.sort(ScriptSort)
+			usedscripts.sort(key=functools.cmp_to_key(ScriptSort))
 		
 
 		for script in usedscripts:
@@ -618,7 +621,7 @@ class DancingShoes:
 
 			# Language
 			usedlanguages = self.UsedLanguages(feature, script)
-			usedlanguages.sort(LanguageSort)
+			usedlanguages.sort(key=functools.cmp_to_key(LanguageSort))
 
 			for language in usedlanguages:
 				featurecode.append('    # %s' % (opentypenames.OTlanguages[TranslateLanguage(language, defaultlanguage)]))
@@ -873,21 +876,21 @@ def CollectGlyphGroups(glyphnames):
 
 # write lines of FDK feature code
 
-def FDKadjustmentcode(adjustments, intendlevel):
+def FDKadjustmentcode(adjustments, indentlevel):
 	featurecode = []
-	intend = '  '
+	indent = '  '
 	
 
 	for adjustment in adjustments:
 		if isinstance(adjustment, GSUBLookup):
 			comment = ''
 			if adjustment.comment: comment = '# ' + adjustment.comment
-			featurecode.append((intendlevel * intend) + 'sub %s by %s; %s' % (adjustment.source, adjustment.target, comment))
+			featurecode.append((indentlevel * indent) + 'sub %s by %s; %s' % (adjustment.source, adjustment.target, comment))
 
 		elif isinstance(adjustment, FeatureLookup):
 			comment = ''
 			if adjustment.comment: comment = '# ' + adjustment.comment
-			featurecode.append((intendlevel * intend) + 'feature %s; %s' % (adjustment.lookupfeature, comment))
+			featurecode.append((indentlevel * indent) + 'feature %s; %s' % (adjustment.lookupfeature, comment))
 
 		elif isinstance(adjustment, GPOSLookupType1):
 			comment = ''
@@ -896,7 +899,7 @@ def FDKadjustmentcode(adjustments, intendlevel):
 				adjustmentcode = adjustment.adjustment[0]
 			else:
 				adjustmentcode = '<%s %s %s %s>' % (adjustment.adjustment[0], adjustment.adjustment[1], adjustment.adjustment[2], adjustment.adjustment[3])
-			featurecode.append((intendlevel * intend) + 'pos %s %s; %s' % (adjustment.glyphs, adjustmentcode, comment))
+			featurecode.append((indentlevel * indent) + 'pos %s %s; %s' % (adjustment.glyphs, adjustmentcode, comment))
 
 		elif isinstance(adjustment, GPOSLookupType2):
 			comment = ''
@@ -905,7 +908,7 @@ def FDKadjustmentcode(adjustments, intendlevel):
 				adjustmentcode = adjustment.adjustment[0]
 			else:
 				adjustmentcode = '<%s %s %s %s>' % (adjustment.adjustment[0], adjustment.adjustment[1], adjustment.adjustment[2], adjustment.adjustment[3])
-			featurecode.append((intendlevel * intend) + 'pos %s %s; %s' % (adjustment.pair, adjustmentcode, comment))
+			featurecode.append((indentlevel * indent) + 'pos %s %s; %s' % (adjustment.pair, adjustmentcode, comment))
 	
 	return featurecode
 
@@ -946,6 +949,14 @@ def ScriptSort(a, b):
 
 def LanguageSort(a, b):
 	if a == '__DEFAULT__':
+		return -1
+	else:
+		return 0
+
+def LanguageSystemSort(a, b):
+	if a[0] == '__DEFAULT__' and a[1] == '__DEFAULT__':
+		return -1
+	elif a[1] == '__DEFAULT__' and b[1] != '__DEFAULT__':
 		return -1
 	else:
 		return 0
