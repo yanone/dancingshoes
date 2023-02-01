@@ -359,6 +359,21 @@ class DancingShoes:
 		else:
 			self.Info('Attempting to add simple substitution feature "%s", but group "%s" is missing in your glyph repertoire.' % (feature, ending))
 
+	def AddIgnoreSubstitution(self, feature, sequence, script = None, language = None, lookupflag = None, comment = None, lookup = None):
+
+		# source and target sequence code is checked for presence
+		sequencestring = self.DeflateClassString(sequence)
+
+		if self.HasGlyphs(sequencestring):
+
+			# Check if feature is present in main feature list
+			if not feature in self.features:
+				self.Warning('Attempting to add substitution to feature "%s", but the feature is not present in your supplied features list' % (feature))
+
+			self.adjustments.append(IgnoreGSUBLookup(feature, sequence, script, language, lookup, lookupflag, comment))
+		else:
+			self.Info('Attempting to add substitution glyph sequence to feature "%s", but glyphs from the sequence ("%s")are missing in your glyph repertoire.' % (feature, sequence))
+			
 	def AddSubstitution(self, feature, source, target, script = None, language = None, lookupflag = None, comment = None, lookup = None):
 
 		# source and target sequence code is checked for presence
@@ -378,7 +393,7 @@ class DancingShoes:
 			self.adjustments.append(GSUBLookup(feature, source, target, script, language, lookup, lookupflag, comment))
 		else:
 			self.Info('Attempting to add substitution glyph sequence to feature "%s", but glyphs from either the source ("%s") or the target ("%s") are missing in your glyph repertoire.' % (feature, source, target))
-			
+
 
 	#def AddDuplicateFeature(self, sourcefeature, targetfeature):
 	#	self.AddFeatureLookup(targetfeature, '', '', '', sourcefeature, '')
@@ -768,6 +783,29 @@ class DancingShoes:
 
 # GSUB
 
+class IgnoreGSUBLookup:
+	def __init__(self, feature, sequence, script, language, lookup, lookupflag, comment):
+		self.type = 'IgnoreGSUBLookup'
+		self.feature = feature
+		self.sequence = sequence
+		self.comment = comment
+
+		self.script = script
+		if not self.script:
+			self.script = '__DEFAULT__'
+		self.language = language
+		if not self.language:
+			self.language = '__DEFAULT__'
+		self.lookup = lookup
+		if not self.lookup:
+			self.lookup = '__DEFAULT__'
+		self.lookupflag = lookupflag
+		if not self.lookupflag:
+			self.lookupflag = '__DEFAULT__'
+	
+	def __repr__(self):
+		return '<IgnoreGSUBLookup %s %s %s>' % (self.feature, self.sequence)
+
 class GSUBLookup:
 	def __init__(self, feature, source, target, script, language, lookup, lookupflag, comment):
 		self.type = 'GSUBLookup'
@@ -882,7 +920,12 @@ def FDKadjustmentcode(adjustments, indentlevel):
 	
 
 	for adjustment in adjustments:
-		if isinstance(adjustment, GSUBLookup):
+		if isinstance(adjustment, IgnoreGSUBLookup):
+			comment = ''
+			if adjustment.comment: comment = '# ' + adjustment.comment
+			featurecode.append((indentlevel * indent) + 'ignore sub %s; %s' % (adjustment.sequence, comment))
+
+		elif isinstance(adjustment, GSUBLookup):
 			comment = ''
 			if adjustment.comment: comment = '# ' + adjustment.comment
 			featurecode.append((indentlevel * indent) + 'sub %s by %s; %s' % (adjustment.source, adjustment.target, comment))
