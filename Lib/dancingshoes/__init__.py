@@ -50,6 +50,7 @@ class DancingShoes:
 		self.glyphnames = glyphnames # List of glyph names
 		self.features = features # List four-digit feature name codes, in order preferred by the foundry/designer
 		self.adjustments = [] # List of OpenType adjustments. This is the main list and will be filled later
+		self.prefixes = []
 		self.glyphgroups = CollectGlyphGroups(self.glyphnames) # Dict of groups. glyphgroups['.tosf'] = ['one.tosf', 'two.tosf', 'three.tosf' ...]
 		self.classes = Ddict(dict) # Two dimensional array of classes.
 		self.stylisticsetnames = {}
@@ -341,6 +342,10 @@ class DancingShoes:
 		self.adjustments.append(FeatureLookup(feature, script, language, lookup, lookupflag, lookupfeature, comment))
 
 
+	def AddPrefix(self, name, code):
+		self.prefixes.append((name, code))
+
+
 	def AddSimpleSubstitutionFeature(self, feature, ending):
 
 		if self.HasGroups([ending]):
@@ -383,7 +388,7 @@ class DancingShoes:
 #			print type(sourcestring)
 #			print targetstring
 
-		if self.HasGlyphs(sourcestring) and self.HasGlyphs(targetstring):
+		if (source and target and self.HasGlyphs(sourcestring) and self.HasGlyphs(targetstring)) or (source and not target):
 
 
 			# Check if feature is present in main feature list
@@ -928,7 +933,10 @@ def FDKadjustmentcode(adjustments, indentlevel):
 		elif isinstance(adjustment, GSUBLookup):
 			comment = ''
 			if adjustment.comment: comment = '# ' + adjustment.comment
-			featurecode.append((indentlevel * indent) + 'sub %s by %s; %s' % (adjustment.source, adjustment.target, comment))
+			if adjustment.source and adjustment.target:
+				featurecode.append((indentlevel * indent) + 'sub %s by %s; %s' % (adjustment.source, adjustment.target, comment))
+			elif adjustment.source and not adjustment.target:
+				featurecode.append((indentlevel * indent) + '%s; %s' % (adjustment.source, comment))
 
 		elif isinstance(adjustment, FeatureLookup):
 			comment = ''
@@ -965,13 +973,13 @@ def TranslateScript(script, defaultlanguage):
 
 
 class Ddict(dict):
-    def __init__(self, default=None):
-        self.default = default
-       
-    def __getitem__(self, key):
-        if key not in self:
-            self[key] = self.default()
-        return dict.__getitem__(self, key)
+	def __init__(self, default=None):
+		self.default = default
+	   
+	def __getitem__(self, key):
+		if key not in self:
+			self[key] = self.default()
+		return dict.__getitem__(self, key)
 
 
 def GetFDKCodeVersion(codeversion):

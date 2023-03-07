@@ -78,6 +78,13 @@ def AssignFeatureCodeToGlyphsFont(f, shoes):
 	aClass.name = "Languagesystems"
 	f.featurePrefixes.append(aClass)
 
+	for name, code in shoes.prefixes:
+		Feature = GSFeaturePrefix()
+		Feature.name = name
+		Feature.automatic = False # The Feature will not be removed on the next autogenerate run.
+		Feature.code = code
+		f.featurePrefixes.append(Feature)
+
 def AssignFeatureCodeToRoboFabFont(f, shoes):
 	f.features.text = shoes.GetFDKCode()
 	
